@@ -1,1 +1,2 @@
-# scenefun3d
+# SceneFun3D: Fine-Grained Functionality and Affordance Understanding
+in 3D Scenes
