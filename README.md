@@ -15,7 +15,7 @@
     <sup>3</sup>TUM,
     <sup>4</sup>Microsoft
   </p>
-  <h2 align="center">CVPR 2024</h2>
+  <h2 align="center">CVPR 2024 Oral</h2>
   <h3 align="center"><a href="https://scenefun3d.github.io">Project Page</a> | <a href="https://alexdelitzas.github.io/assets/pdf/SceneFun3D.pdf">Paper</a> | <a href="https://github.com/SceneFun3D">Code</a> </h3>
   <div align="center"></div>
 </p>
