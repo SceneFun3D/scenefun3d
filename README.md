@@ -1,3 +1,5 @@
 # SceneFun3D ToolKit
 
-Coming soon this week.
+## Documentation
+
+Project documentation can be found [here](https://scenefun3d.github.io/documentation).

@@ -1,0 +1,10 @@
+numpy
+pandas
+open3d==0.14.1
+plyfile
+imageio
+opencv-python
+moviepy
+scipy
+tqdm
+pyviz3d==0.3.6
