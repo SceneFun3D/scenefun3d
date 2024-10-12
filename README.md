@@ -1,7 +1,7 @@
 <p align="center">
   <!-- <img src="assets/logo.png" alt="Logo" width="250px"> -->
-  <h1 style="text-align: center; display: flex; justify-content: center; align-items: center; font-weight: 600">
-    SceneFun3D <img src="https://scenefun3d.github.io/documentation/assets/logo2.png" alt="Logo" width="80px" style="margin-left: 10px;">
+  <h1 align="center">
+    SceneFun3D <img src="https://scenefun3d.github.io/documentation/assets/logo2.png" alt="Logo" width="80px"">
   </h1>
   <h2 align="center">Fine-Grained Functionality and Affordance Understanding <br/> in 3D Scenes</h2>
   <h3 align="center">CVPR 2024 (Oral)</h2>
@@ -21,13 +21,6 @@
   </p>
 </p>
 
-<p align="center" style="text-align: center;">
-  <img src="https://scenefun3d.github.io/documentation/assets/afilliation_logos/eth_zurich2.png" alt="Logo 1" width="150" style="margin-right: 40px; padding-bottom: 10px">
-  <img src="https://scenefun3d.github.io/documentation/assets/afilliation_logos/google.png" alt="Logo 2"width="120" style="margin-right: 40px;">
-  <img src="https://scenefun3d.github.io/documentation/assets/afilliation_logos/tum.png" alt="Logo 3" width="60" style="margin-right: 40px; padding-bottom: 10px">
-  <img src="https://scenefun3d.github.io/documentation/assets/afilliation_logos/microsoft2.png" alt="Logo 4" width="180" style="padding-bottom: 8px">
-</p>
-<br />
 
 <br />
 <p align="center">
