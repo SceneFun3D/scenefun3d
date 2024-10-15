@@ -68,14 +68,14 @@ if __name__ == "__main__":
 
     video_id_csv = None
     df = None
-    if args.split == "train_val_set":
-        video_id_csv = "benchmark_file_lists/train_val_set.csv"
-    elif args.split == "train_val_set" and args.download_only_one_video_sequence:
+    if args.split == "train_val_set" and args.download_only_one_video_sequence:
         video_id_csv = "benchmark_file_lists/train_val_set_only_one_video.csv"
-    elif args.split == "test_set":
-        video_id_csv = "benchmark_file_lists/test_set.csv"
+    elif args.split == "train_val_set":
+        video_id_csv = "benchmark_file_lists/train_val_set.csv"
     elif args.split == "test_set" and args.download_only_one_video_sequence:
         video_id_csv = "benchmark_file_lists/test_set_only_one_video.csv"
+    elif args.split == "test_set":
+        video_id_csv = "benchmark_file_lists/test_set.csv"
     elif args.split == "custom":
         if args.video_id_csv:
             video_id_csv = args.video_id_csv
