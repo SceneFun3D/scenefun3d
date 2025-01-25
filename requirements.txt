@@ -4,7 +4,7 @@ open3d==0.14.1
 plyfile
 imageio
 opencv-python
-moviepy
+moviepy>=2.0.0
 scipy
 tqdm
 pyviz3d==0.3.7
