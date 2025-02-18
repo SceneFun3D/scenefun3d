@@ -3,76 +3,43 @@ Projects the RGB color of the iPad camera frames on the 3D points of the Faro la
 
 This example script demonstrates how to utilize the data assets and helper scripts in the SceneFun3D dataset. 
 
+Before running this example, download the requireed assets:
+python -m data_downloader.data_asset_download --download_dir <scenefun3d_dataset_path> --visit_id 421372 --download_only_one_video_sequence --dataset_assets hires_wide_intrinsics
+
 SceneFun3D Toolkit
 """
 
 import numpy as np
+import tyro
+from typing import Annotated
 import open3d as o3d
-import os
-import argparse
 from utils.data_parser import DataParser
 from utils.viz import viz_3d
 from utils.fusion_util import PointCloudToImageMapper
 from utils.pc_process import pc_estimate_normals
 from tqdm import tqdm
+import viser
+import time
 
-##################
-### PARAMETERS ###
-##################
-visibility_threshold = 0.25
-cut_bound = 5
-vis_result = True
-##################
-##################
 
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "--data_dir",
-        default="data",
-        help="Specify the path of the data"
-    )
-
-    parser.add_argument(
-        "--visit_id",
-        help="Specify the identifier of the scene"
-    )
-
-    parser.add_argument(
-        "--video_id",
-        help="Specify the identifier of the video sequence"
-    )
-
-    parser.add_argument(
-        "--coloring_asset",
-        default="hires_wide",
-        choices=["hires_wide"], # TODO: add support for lowres_wide
-        help="Specify the RGB data asset to use for projecting the color to the laser scan"
-    )
-
-    parser.add_argument(
-        "--crop_extraneous",
-        action="store_true",
-        help="Specify whether to crop the extraneous points from the laser scan"
-    )
-
-    args = parser.parse_args()
-
-    visit_id = str(args.visit_id)
-    video_id = str(args.video_id)
-
-    dataParser = DataParser(args.data_dir)
+def main(
+  data_dir: Annotated[str, tyro.conf.arg(help="Path to the dataset")],
+  visit_id: Annotated[str, tyro.conf.arg(help="Visit identifier")] = '421372',
+  video_id: Annotated[str, tyro.conf.arg(help="Video sequence identifier")] = '42445448',
+  coloring_asset: Annotated[int, tyro.conf.arg(help="RGB data asset to project color to laser scan")] = "hires_wide",
+  crop_extraneous: Annotated[bool, tyro.conf.arg(help="Whether to crop extraneous points from laser scan")] = True,
+  cut_bound: Annotated[float, tyro.conf.arg(help="Cut bound for the laser scan")] = 5,
+  visibility_threshold: Annotated[float, tyro.conf.arg(help="Visibility threshold for the laser scan")] = 0.25
+  ):
 
     print(f"Processing video_id {video_id} (visit_id: {visit_id}) ...")
+    dataParser = DataParser(data_dir)
+    pointcloud = dataParser.get_laser_scan(visit_id)
+    if crop_extraneous:
+        pointcloud = dataParser.get_cropped_laser_scan(visit_id, pointcloud)
 
-    pcd = dataParser.get_laser_scan(visit_id)
-    if args.crop_extraneous:
-        pcd = dataParser.get_cropped_laser_scan(visit_id, pcd)
-
-    locs_in = np.array(pcd.points)
-    n_points = locs_in.shape[0]
+    point_positions = np.array(pointcloud.points)
+    num_points = point_positions.shape[0]
 
     poses_from_traj = dataParser.get_camera_trajectory(visit_id, video_id, pose_source="colmap")
 
@@ -94,26 +61,21 @@ if __name__ == "__main__":
         data_asset_identifier="hires_wide_intrinsics"
     )
 
-    w, h, _, _, _, _ = dataParser.read_camera_intrinsics(
-        next(iter(intrinsics_paths.values()))
-    )
-
-    w = int(w)
-    h = int(h)
+    w, h, _, _, _, _ = dataParser.read_camera_intrinsics(next(iter(intrinsics_paths.values())))
     
     point2img_mapper = PointCloudToImageMapper(
-        image_dim=(w, h),
+        image_dim=(int(w), int(h)),
         visibility_threshold=visibility_threshold,
         cut_bound=cut_bound
     )
 
-    counter = np.zeros((n_points, 1))
-    sum_features = np.zeros((n_points, 3))
+    counter = np.zeros((num_points, 1))
+    sum_features = np.zeros((num_points, 3))
 
     skipped_frames = []
 
     sorted_timestamps = sorted(rgb_frame_paths.keys())
-    for cur_timestamp in tqdm(sorted_timestamps, desc="Frames processing"):
+    for cur_timestamp in tqdm(sorted_timestamps[::10], desc="Frames processing"):
 
         pose = dataParser.get_nearest_pose(cur_timestamp, poses_from_traj)
 
@@ -126,9 +88,9 @@ if __name__ == "__main__":
         depth = dataParser.read_depth_frame(depth_frame_paths[cur_timestamp]) 
         intrinsic = dataParser.read_camera_intrinsics(intrinsics_paths[cur_timestamp], format ="matrix")
 
-        # calculate the 3d-2d mapping based on the depth
-        mapping = np.ones([n_points, 4], dtype=int)
-        mapping[:, 1:4] = point2img_mapper.compute_mapping(pose, locs_in, depth, intrinsic)
+        # compute the 3D-2D mapping based on the depth
+        mapping = np.ones([num_points, 4], dtype=int)
+        mapping[:, 1:4] = point2img_mapper.compute_mapping(pose, point_positions, depth, intrinsic)
 
         if mapping[:, 3].sum() == 0: # no points corresponds to this image, skip
             continue
@@ -144,11 +106,16 @@ if __name__ == "__main__":
 
     counter[counter==0] = 1e-5
     feat_bank = sum_features / counter
-    feat_bank[feat_bank[:, 0:3] == [0., 0., 0.]] = 169. / 255
+    feat_bank[feat_bank[:, 0:3] == [0.0, 0.0, 0.0]] = 169.0 / 255
 
-    pcd.colors = o3d.utility.Vector3dVector(feat_bank)
+    # Visualization
+    server = viser.ViserServer()
+    server.scene.add_point_cloud("pcd",
+                                 points=point_positions[::10] - np.mean(point_positions, axis=0),
+                                 colors=feat_bank[::10],
+                                 point_size=0.01)
+    while True:  # keep server alive
+      time.sleep(0.2)
 
-    if vis_result:
-        pcd = pc_estimate_normals(pcd)
-        viz_3d([pcd], show_coordinate_system=False)
-
+if __name__ == "__main__":
+  tyro.cli(main)
