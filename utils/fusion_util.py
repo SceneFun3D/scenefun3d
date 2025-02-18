@@ -47,11 +47,10 @@ class PointCloudToImageMapper(object):
         :param camera_to_world: 4 x 4
         :param coords: N x 3 format
         :param depth: H x W format
-        :param intrinsic: 3x3 format
-        :return: mapping, N x 3 format, (H,W,mask)
+        :param intrinsic: 3 x 3 format
+        :return: mapping, N x 3 format, (H, W, mask)
         """
 
-        mapping = np.zeros((3, coords.shape[0]), dtype=int)
         coords_new = np.concatenate([coords, np.ones([coords.shape[0], 1])], axis=1).T
         assert coords_new.shape[0] == 4, "[!] Shape error"
 
@@ -63,16 +62,16 @@ class PointCloudToImageMapper(object):
         inside_mask = (pi[0] >= self.cut_bound) * (pi[1] >= self.cut_bound) \
                     * (pi[0] < self.image_dim[0]-self.cut_bound) \
                     * (pi[1] < self.image_dim[1]-self.cut_bound)
+        
         if depth is not None:
-            depth_cur = depth[pi[1][inside_mask], pi[0][inside_mask]]
-            occlusion_mask = np.abs(depth[pi[1][inside_mask], pi[0][inside_mask]]
-                                    - p[2][inside_mask]) <= \
-                                    self.vis_thres * depth_cur
-
-            inside_mask[inside_mask == True] = occlusion_mask
+          depth_cur = depth[pi[1][inside_mask], pi[0][inside_mask]]
+          occlusion_mask = np.abs(depth_cur - p[2][inside_mask]) <= self.vis_thres * depth_cur
+          inside_mask[inside_mask] = occlusion_mask
         else:
-            front_mask = p[2]>0 # make sure the depth is in front
-            inside_mask = front_mask*inside_mask
+          front_mask = p[2] > 0 # make sure the depth is in front
+          inside_mask = front_mask * inside_mask
+
+        mapping = np.zeros((3, coords.shape[0]), dtype=int)
         mapping[0][inside_mask] = pi[1][inside_mask]
         mapping[1][inside_mask] = pi[0][inside_mask]
         mapping[2][inside_mask] = 1
