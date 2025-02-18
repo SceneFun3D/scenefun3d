@@ -15,9 +15,7 @@
         "PYTHONPATH": "${workspaceFolder}"
       },
       "args": [
-        "--visit_id", "421372",
-        "--video_id", "42445448",
-        "--data_dir", "/media/fengelmann/T9/opennerf/data/scenefun3d/",
+        "--data_dir", "~/Programming/scenefun3d/data",
       ]
     }
   ]

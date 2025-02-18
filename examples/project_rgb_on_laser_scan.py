@@ -3,8 +3,8 @@ Projects the RGB color of the iPad camera frames on the 3D points of the Faro la
 
 This example script demonstrates how to utilize the data assets and helper scripts in the SceneFun3D dataset. 
 
-Before running this example, download the requireed assets:
-python -m data_downloader.data_asset_download --download_dir <scenefun3d_dataset_path> --visit_id 421372 --download_only_one_video_sequence --dataset_assets hires_wide_intrinsics
+Before running this example, download the required assets:
+> python -m data_downloader.data_asset_download --split custom --download_dir data --visit_id 420673 --video_id 42445198 --dataset_assets hires_wide_intrinsics laser_scan_5mm hires_poses hires_wide hires_depth crop_mask
 
 SceneFun3D Toolkit
 """
@@ -21,8 +21,8 @@ import time
 
 def main(
   data_dir: Annotated[str, tyro.conf.arg(help="Path to the dataset")],
-  visit_id: Annotated[str, tyro.conf.arg(help="Visit identifier")] = '421372',
-  video_id: Annotated[str, tyro.conf.arg(help="Video sequence identifier")] = '42445448',
+  visit_id: Annotated[str, tyro.conf.arg(help="Visit identifier")] = '420673',
+  video_id: Annotated[str, tyro.conf.arg(help="Video sequence identifier")] = '42445198',
   coloring_asset: Annotated[int, tyro.conf.arg(help="RGB data asset to project color to laser scan")] = "hires_wide",
   crop_extraneous: Annotated[bool, tyro.conf.arg(help="Whether to crop extraneous points from laser scan")] = True,
   cut_bound: Annotated[float, tyro.conf.arg(help="Cut bound for the laser scan")] = 5,
@@ -54,7 +54,8 @@ def main(
     sum_features = np.zeros((num_points, 3))
     skipped_frames = []
     sorted_timestamps = sorted(rgb_frame_paths.keys())
-    for cur_timestamp in tqdm(sorted_timestamps[::10], desc="Frames processing"):
+    subsample = 10  # for faster processing
+    for cur_timestamp in tqdm(sorted_timestamps[::subsample], desc="Frames processing"):
         pose = dataParser.get_nearest_pose(cur_timestamp, poses_from_traj)
         if pose is None:
             print(f"Skipping frame {cur_timestamp}.")
@@ -88,9 +89,10 @@ def main(
 
     # Visualization
     server = viser.ViserServer()
+    subsample = 10  # for faster visualization
     server.scene.add_point_cloud("pcd",
-                                 points=point_positions[::10] - np.mean(point_positions, axis=0),
-                                 colors=feat_bank[::10],
+                                 points=point_positions[::subsample] - np.mean(point_positions, axis=0),
+                                 colors=feat_bank[::subsample],
                                  point_size=0.01)
     while True:  # keep server alive
       time.sleep(0.2)
