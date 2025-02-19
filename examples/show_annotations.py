@@ -11,31 +11,26 @@ import numpy as np
 import tyro
 from typing import Annotated
 from utils.data_parser import DataParser
-from utils.fusion_util import PointCloudToImageMapper
-from tqdm import tqdm
 import viser
 import time
 
 def main(
   data_dir: Annotated[str, tyro.conf.arg(help="Path to the dataset")],
-  visit_id: Annotated[str, tyro.conf.arg(help="Visit identifier")] = '420673',
-  video_id: Annotated[str, tyro.conf.arg(help="Video sequence identifier")] = '42445198'):
+  visit_id: Annotated[str, tyro.conf.arg(help="Visit identifier")] = '420673'):
   
   # Read required data assets
   dataParser = DataParser(data_dir)
   laser_point_cloud = dataParser.get_laser_scan(visit_id)
   points = np.array(laser_point_cloud.points) - np.mean(laser_point_cloud.points, axis=0)
   colors = np.array(laser_point_cloud.colors)
-  annotations = dataParser.get_annotations(visit_id, video_id)
+  annotations = dataParser.get_annotations(visit_id)
   descriptions = dataParser.get_descriptions(visit_id)
   motions = dataParser.get_motions(visit_id)
   
   # Visualization
   server = viser.ViserServer()
   subsample = 10  # for faster visualization
-  
-  server.scene.add_point_cloud(f"scene", points=points[::100], colors=colors[::100], point_size=0.01)
-  # with server.gui.add_folder('Annotations'):
+  server.scene.add_point_cloud(f"scene", points=points[::subsample], colors=colors[::subsample], point_size=0.01)
   
   annotation_positions = {}
   for i, annotation in enumerate(annotations):
@@ -43,22 +38,24 @@ def main(
     label = annotation["label"]
     if label == "exclude":
       continue
-    
     point_ids = annotation["indices"]
     annotation_positions[annot_id] = np.mean(points[point_ids], axis=0)
     server.scene.add_point_cloud(f"annotations/{i}/mask",
                                   points=points[point_ids],
                                   colors=colors[point_ids],
                                   point_size=0.01)
-    server.scene.add_label(f"annotations/{i}/label", label, position=annotation_positions[annot_id])
+    server.scene.add_label(f"annotations/{i}/label",
+                           label,
+                           position=annotation_positions[annot_id])
   
   for i, description in enumerate(descriptions):
     annot_id = description["annot_id"][0]
     description_text = description["description"]
-    server.scene.add_label(f"descriptions/{i}/description", description_text, position=annotation_positions[annot_id]-np.array([0, 0, 0.1]))
+    server.scene.add_label(f"descriptions/{i}/description",
+                           description_text,
+                           position=annotation_positions[annot_id] - np.array([0.0, 0.0, 0.1]))
     
   for i, motion in enumerate(motions):
-    motion_id = motion["motion_id"]
     annot_id = motion["annot_id"]
     motion_type = motion["motion_type"]
     motion_dir = motion["motion_dir"]
@@ -72,19 +69,16 @@ def main(
         segment = np.array([points[motion_origin_idx], points[motion_origin_idx] + (np.array(motion_dir) / 5.0)])  
         server.scene.add_line_segments(f"motions/{i}/outwards", points=np.expand_dims(segment, 0), colors=[255, 0, 0], line_width=5)
     elif motion_type == "rot":
-        vec0 = annotation_positions[annot_id] - points[motion_origin_idx]
-        vec1 = np.array(motion_dir)
-        vec2 = np.cross(vec1, vec0)
-        pts = np.array([annotation_positions[annot_id], points[motion_origin_idx] + vec2])
-        ctrl = np.array([annotation_positions[annot_id], points[motion_origin_idx] + vec2 + vec0])
-        server.scene.add_spline_cubic_bezier(
-            f"/motions/{i}/rot4_{motion_viz_orient}",
-            positions=pts,
-            control_points=ctrl,
-            line_width=5.0,
-            color=[0, 0, 255],
-            segments=10,
-        )
+      vector1 = annotation_positions[annot_id] - points[motion_origin_idx]
+      vector1_norm = np.linalg.norm(vector1)
+      segments = np.array([
+         [annotation_positions[annot_id], points[motion_origin_idx] + (np.array(motion_dir)) * vector1_norm*0.5],
+         [annotation_positions[annot_id], points[motion_origin_idx] - (np.array(motion_dir)) * vector1_norm*0.5],
+         [points[motion_origin_idx] + (np.array(motion_dir)) * vector1_norm * 0.5,
+          points[motion_origin_idx] - (np.array(motion_dir)) * vector1_norm * 0.5],
+        ])
+      server.scene.add_line_segments(f"motions/{i}/outwards", points=segments, colors=[0, 0, 255], line_width=5)
+
   print('Done')
   while True:  # keep server alive
     time.sleep(0.2)
