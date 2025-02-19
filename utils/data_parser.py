@@ -421,7 +421,6 @@ class DataParser:
 
         return desired_pose
 
-
     def get_interpolated_pose(self, 
                                 desired_timestamp,
                                 poses_from_traj, 
@@ -509,7 +508,6 @@ class DataParser:
         assert desired_pose.shape == (4, 4)
 
         return desired_pose
-
 
     def get_transform(self, visit_id, video_id):
         """
