@@ -422,7 +422,6 @@ class DataParser:
         return desired_pose
 
 
-
     def get_interpolated_pose(self, 
                                 desired_timestamp,
                                 poses_from_traj, 

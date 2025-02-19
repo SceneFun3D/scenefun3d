@@ -4,6 +4,7 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
+    
     {
       "name": "Examples/ProjectRGBOnLaserScan",
       "type": "debugpy",
@@ -17,6 +18,20 @@
       "args": [
         "--data_dir", "~/Programming/scenefun3d/data",
       ]
-    }
+    },
+    {
+      "name": "Examples/ShowAnnotations",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "examples/show_annotations.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "args": [
+        "--data_dir", "~/Programming/scenefun3d/data",
+      ]
+    },
   ]
 }
