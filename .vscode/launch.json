@@ -33,5 +33,22 @@
         "--data_dir", "~/Programming/scenefun3d/data",
       ]
     },
-  ]
+    {
+      "name": "Export NerfStudio",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "examples/export_nerfstudio_format.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "args": [
+        "--data_dir", "~/Programming/scenefun3d/data/test",
+      ]
+    },  ]
 }
+
+
+
