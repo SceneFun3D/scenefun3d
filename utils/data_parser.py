@@ -524,7 +524,6 @@ class DataParser:
         transform = np.load(transform_path) 
         return transform
 
-
     def read_rgb_frame(self, rgb_frame_path, normalize=False):
         """
         Read an RGB frame from the specified path.
@@ -631,7 +630,6 @@ class DataParser:
         
         return cropped_laser_scan
 
-
     def get_data_asset_path(self, data_asset_identifier, visit_id, video_id=None):
         """
         Get the file path for a specified data asset.
@@ -667,7 +665,6 @@ class DataParser:
             data_path = data_path.replace("<video_id>", video_id)
 
         return data_path
-
 
     def get_annotations(self, visit_id, group_excluded_points=True):
         """
@@ -710,7 +707,6 @@ class DataParser:
 
         return annotations_data
 
-
     def get_descriptions(self, visit_id):
         """
         Retrieve the natural language task descriptions for a specified scene.
@@ -727,7 +723,6 @@ class DataParser:
             descriptions_data = json.load(f)["descriptions"]
 
         return descriptions_data
-
 
     def get_motions(self, visit_id):
         """

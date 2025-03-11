@@ -2,7 +2,7 @@
 Export the scenefun3d dataset to the nerfstudio format.
 
 Before running this example, download the a few assets:
-python -m data_downloader.data_asset_download --split test_split --download_dir data/test --dataset_assets hires_wide_intrinsics hires_poses hires_wide hires_depth
+python -m data_downloader.data_asset_download --split test_set --download_dir data/test --dataset_assets hires_wide_intrinsics hires_poses hires_wide hires_depth
 
 SceneFun3D Toolkit
 """
