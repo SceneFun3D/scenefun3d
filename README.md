@@ -35,6 +35,13 @@
 
 This repository contains the code for the SceneFun3D Toolkit. Please refer to the [documentation page](https://scenefun3d.github.io/documentation) for information and detailed instructions.
 
+## News 📢 
+
+Check the [**Changelog**](https://scenefun3d.github.io/documentation/changelog/) for detailed updates (*Last update*: 10/03/2025)
+
+- **March 10, 2025**: The [benchmark submission portal](https://eval.ai/web/challenges/challenge-page/2466/overview) is now live. Check out the updated [submission instructions](https://scenefun3d.github.io/documentation/benchmarks/guidelines/) and the [changelog](https://scenefun3d.github.io/documentation/changelog/).
+- **October 10, 2024**: Initial release.
+
 ## Documentation 📖
 
 Project documentation can be found here: [https://scenefun3d.github.io/documentation](https://scenefun3d.github.io/documentation).
@@ -46,7 +53,9 @@ Project documentation can be found here: [https://scenefun3d.github.io/documenta
 * <a href="https://scenefun3d.github.io/documentation" target="_blank">Documentation</a>
 * <a href="https://alexdelitzas.github.io/assets/pdf/SceneFun3D.pdf" target="_blank">Paper</a>
 * <a href="https://github.com/SceneFun3D" target="_blank">Github repositories</a>
-* <a href="https://scenefun3d.github.io/documentation" target="_blank">Benchmarks (coming soon)</a>
+* <a href="https://scenefun3d.github.io/documentation/toolkit/data-downloader/" target="_blank">Data downloader instructions</a>
+* <a href="https://eval.ai/web/challenges/challenge-page/2466/overview" target="_blank">Benchmark submission portal</a>
+* <a href="https://scenefun3d.github.io/documentation/benchmarks/guidelines/" target="_blank">Benchmark instructions</a>
 
 ## BibTeX Citation 🙏
 
