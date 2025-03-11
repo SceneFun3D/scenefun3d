@@ -4,7 +4,7 @@ import os
 import numpy as np
 from tqdm import tqdm
 
-from utils.rle import rle_encode
+from eval.functionality_segmentation.eval_utils.rle import rle_encode
 
 
 def main(read_dir, write_dir):

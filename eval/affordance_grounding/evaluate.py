@@ -3,7 +3,7 @@ import os
 import numpy as np
 from eval.affordance_grounding.eval_utils.eval_script import evaluate
 from eval.affordance_grounding.eval_utils.util_3d import get_excluded_point_mask
-from utils.rle import rle_decode, rle_encode
+from eval.affordance_grounding.eval_utils.rle import rle_decode, rle_encode
 
 def main(pred_dir, gt_dir):
     scene_desc_names = sorted(el[:-4] for el in os.listdir(gt_dir) if el.endswith('.txt'))
