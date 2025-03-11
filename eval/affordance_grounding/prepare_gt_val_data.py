@@ -1,3 +1,8 @@
+"""
+This script reads scene annotations from the validation set and 
+organizes them into the evaluation ground truth (GT) format.
+"""
+
 import argparse
 import os
 import numpy as np
