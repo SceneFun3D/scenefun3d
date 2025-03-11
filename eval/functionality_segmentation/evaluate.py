@@ -3,7 +3,7 @@ import os
 import numpy as np
 from eval.functionality_segmentation.eval_utils.eval_script import evaluate
 from eval.functionality_segmentation.eval_utils.util_3d import get_excluded_point_mask
-from utils.rle import rle_decode, rle_encode
+from eval.functionality_segmentation.eval_utils.rle import rle_decode, rle_encode
 
 def main(pred_dir, gt_dir):
     scene_names = sorted(el[:-4] for el in os.listdir(gt_dir) if el.endswith('.txt'))

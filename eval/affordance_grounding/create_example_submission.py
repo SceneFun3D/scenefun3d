@@ -1,23 +1,28 @@
+"""
+This script reads the ground truth (GT) data in the evaluation format and 
+generates an example submission that achieves a perfect score on the benchmark's validation set.
+"""
+
 import argparse
 import os
 
 import numpy as np
 from tqdm import tqdm
 
-from utils.rle import rle_encode
+from eval.affordance_grounding.eval_utils.rle import rle_encode
 
-def main(read_dir, write_dir):
+def main(gt_dir, write_dir):
 
     write_gt_dir_pred_masks = os.path.join(write_dir, 'predicted_masks')
 
     os.makedirs(write_dir, exist_ok=True)
     os.makedirs(write_gt_dir_pred_masks, exist_ok=True)
 
-    scene_names = sorted([el for el in os.listdir(read_dir) if el.endswith('.txt')])
+    scene_names = sorted([el for el in os.listdir(gt_dir) if el.endswith('.txt')])
 
     for scene_name in tqdm(scene_names):
         scene_id = scene_name.split('.')[0]
-        gt = np.loadtxt(os.path.join(read_dir, scene_id + '.txt')).astype(int)
+        gt = np.loadtxt(os.path.join(gt_dir, scene_id + '.txt')).astype(int)
         obj_ids = np.unique(gt)
         lines = []
         for idx, obj_id in enumerate(obj_ids):
@@ -44,17 +49,17 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser()
     
     parser.add_argument(
-        "--read_dir",
-        help="Specify the directory from where you want to read your predicted masks.",
+        "--gt_dir",
+        help="Specify the directory where the ground-truth data is stored.",
         required=True
     )
 
     parser.add_argument(
         "--write_dir",
-        help="Specify the directory where you want to save your predictions in RLE format.",
+        help="Specify the directory where you want to save your predictions in the submission format.",
         required=True
     )
 
     args = parser.parse_args()
 
-    main(args.read_dir, args.write_dir)
+    main(args.gt_dir, args.write_dir)
