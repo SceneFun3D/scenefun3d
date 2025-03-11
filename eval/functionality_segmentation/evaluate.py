@@ -3,6 +3,7 @@ import os
 import numpy as np
 from eval.functionality_segmentation.eval_utils.eval_script import evaluate
 from eval.functionality_segmentation.eval_utils.util_3d import get_excluded_point_mask
+from utils.rle import rle_decode, rle_encode
 
 def main(pred_dir, gt_dir):
     scene_names = sorted(el[:-4] for el in os.listdir(gt_dir) if el.endswith('.txt'))
@@ -33,10 +34,11 @@ def main(pred_dir, gt_dir):
         pred_classes = []
         pred_scores = []
         for mask_path, affordance_class, conf_score in scene_pred_mask_list: 
-            pred_mask_indices = np.loadtxt(os.path.join(pred_dir, mask_path), dtype=np.uint32)
-            pred_mask = np.zeros(point_cloud_length, dtype=np.uint8)
-            pred_mask[pred_mask_indices] = 1
-            pred_mask = pred_mask[np.logical_not(excluded_points_mask)]
+            with open(os.path.join(pred_dir, mask_path), "r", encoding="utf-8") as file:
+                rle_counts = file.read()
+            
+            pred_mask = rle_decode(counts = rle_counts, length=point_cloud_length)
+            pred_mask = pred_mask[np.logical_not(excluded_points_mask)] 
 
             if np.sum(pred_mask) < 1: # means that the pred mask is empty after filtering out the prediction on the excluded points
                 continue
