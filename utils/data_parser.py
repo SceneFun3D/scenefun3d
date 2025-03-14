@@ -201,7 +201,7 @@ class DataParser:
             traj_timestamp = line.split(" ")[0]
 
             if pose_source == "colmap":
-                poses_from_traj[f"{float(traj_timestamp)}"] = np.array(self.TrajStringToMatrix(line)[1].tolist())
+                poses_from_traj[f"{traj_timestamp}"] = np.array(self.TrajStringToMatrix(line)[1].tolist())
             elif pose_source == "arkit":
                 poses_from_traj[f"{round(float(traj_timestamp), 3):.3f}"] = np.array(self.TrajStringToMatrix(line)[1].tolist())
 
