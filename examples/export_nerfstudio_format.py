@@ -7,6 +7,8 @@ python -m data_downloader.data_asset_download --split test_set --download_only_o
 SceneFun3D Toolkit
 """
 
+import os
+import shutil
 import numpy as np
 import tyro
 from typing import Annotated
@@ -16,21 +18,19 @@ import viser.transforms as tf
 
 import json
 import time
-import trimesh
 from pathlib import Path
-from typing import Optional, List
 from nerfstudio.process_data import process_data_utils
 from nerfstudio.process_data.process_data_utils import CAMERA_MODELS
 from PIL import Image
 
 
-def main(data_dir: Path = 'data/test',
-         output_dir: str = 'data/nerfstudio',
+def main(data_dir: Path = '/data/scenefun3d/data/',
+         output_dir: str = '/data/opennerf/data/nerfstudio/scenefun3d/',
          csv_file: str = 'benchmark_file_lists/test_set_only_one_video.csv',
          max_dataset_size: int = 200):
   with open(csv_file, 'r') as f:
     lines = f.readlines()
-  for line in lines[1:2]:
+  for line in lines[1:]:
     visit_id, video_id = line.strip().split(',')    
     export_scene(data_dir, output_dir, visit_id, video_id, max_dataset_size)
 
@@ -40,12 +40,18 @@ def export_scene(
   output_dir: Annotated[Path, tyro.conf.arg(help="Where to write the nerfstudio fileformats.")],
   visit_id: Annotated[str, tyro.conf.arg(help="Visit identifier")],
   video_id: Annotated[str, tyro.conf.arg(help="Video sequence identifier")],
-  max_dataset_size: Annotated[int, tyro.conf.arg(help="Maximum number of images to export")]):
+  max_dataset_size: Annotated[int, tyro.conf.arg(help="Maximum number of images to export")],
+  visualize: bool=False):
   
   verbose = True
   num_downscales = 2
   dataParser = DataParser(data_dir)
-    
+  
+  # Copy laser_scan
+  mesh_path = data_dir / visit_id / f'{visit_id}_laser_scan.ply'
+  os.makedirs(output_dir / Path(visit_id), exist_ok=True)
+  shutil.copy(mesh_path, output_dir / Path(visit_id))
+
   # Create output directories
   output_dir = output_dir / Path(visit_id) / Path(video_id)
   output_image_dir = output_dir / 'images'
@@ -64,7 +70,7 @@ def export_scene(
   input_depths_timesteps = sorted(list(input_depths.keys()))
   intrinsics_timesteps = sorted(list(input_intrinsics.keys()))
   extrinsics_timesteps = sorted(list(input_extrinsics.keys()))
-  
+
   valid_timesteps = []
   for timestep in input_images_timesteps:
     if timestep in input_depths_timesteps and \
@@ -80,6 +86,7 @@ def export_scene(
   valid_timesteps_filtered = [valid_timesteps[i] for i in idx]
   image_filenames = [Path(input_images[t]) for t in valid_timesteps_filtered]
   depth_filenames = [Path(input_depths[t]) for t in valid_timesteps_filtered]
+
 
   # Copy images to output directory
   copied_image_paths = process_data_utils.copy_images_list(
@@ -97,8 +104,9 @@ def export_scene(
   assert(len(copied_image_paths) == len(copied_depth_paths))
   copied_image_paths = [Path("images/" + copied_image_path.name) for copied_image_path in copied_image_paths]
 
-  server = viser.ViserServer()
-  server.scene.world_axes.visible = True
+  if visualize:
+    server = viser.ViserServer()
+    server.scene.world_axes.visible = True
   
   out = {}
   out['camera_model'] = "OPENCV"
@@ -134,21 +142,23 @@ def export_scene(
     frame['transform_matrix'] = (T @ T_iphone2nerfstudio).tolist()
     frames.append(frame)
     image = Image.open(image_path)
-    server.scene.add_camera_frustum(
-      f"/frames/{i}/frustum",
-      fov=2 * np.arctan2(w / 2, fx),
-      aspect= w / h,
-      scale=0.05,
-      image=np.array(image)[::20, ::20],
-      wxyz=tf.SO3.from_matrix(T[:3, :3]).wxyz,
-      position=T[:3, 3] - input_extrinsics[valid_timesteps_filtered[0]][:3, 3])
+    if visualize:
+      server.scene.add_camera_frustum(
+        f"/frames/{i}/frustum",
+        fov=2 * np.arctan2(w / 2, fx),
+        aspect= w / h,
+        scale=0.05,
+        image=np.array(image)[::20, ::20],
+        wxyz=tf.SO3.from_matrix(T[:3, :3]).wxyz,
+        position=T[:3, 3] - input_extrinsics[valid_timesteps_filtered[0]][:3, 3])
 
   out['frames'] = frames
   with open(output_dir / "transforms.json", "w", encoding="utf-8") as f:
     json.dump(out, f, indent=4)
   
-  while True:
-    time.sleep(0.1)
+  if visualize:
+    while True:
+      time.sleep(0.1)
   
 
 if __name__ == "__main__":

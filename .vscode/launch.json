@@ -34,7 +34,7 @@
       ]
     },
     {
-      "name": "Export NerfStudio",
+      "name": "Examples/ExportNerfStudio",
       "type": "debugpy",
       "request": "launch",
       "program": "examples/export_nerfstudio_format.py",
@@ -45,10 +45,11 @@
         "PYTHONPATH": "${workspaceFolder}"
       },
       "args": [
-        "--data_dir", "~/Programming/scenefun3d/data/test",
+        "--data_dir", "/data/scenefun3d/data/",
       ]
     },  ]
 }
 
+        //  output_dir: str = '/data/opennerf/data/nerfstudio/scenefun3d/',
 
 
